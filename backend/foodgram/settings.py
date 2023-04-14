@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-vf(qmeu%%!vhpr*il7x5lz-ee(msaqf5+uk!g1#vdt8og5u3nt'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -118,9 +118,9 @@ DJOSER = {
         'set_password': ['djoser.permissions.CurrentUserOrAdmin'],
     },
     'SERIALIZERS': {
-        'user': 'api.v1.serializers.UserSerializer',
-        'user_list': 'api.v1.serializers.UserSerializer',
-        'current_user': 'api.v1.serializers.UserSerializer',
+        'user': 'api.serializers.UserSerializer',
+        'user_list': 'api.serializers.UserSerializer',
+        'current_user': 'api.serializers.UserSerializer',
     },
 }
 
