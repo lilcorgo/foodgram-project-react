@@ -29,7 +29,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(methods=['POST', 'DELETE'],
             permission_classes=(IsAuthenticated,),
             detail=True)
-    def follow(self, request, pk):
+    def subscribe(self, request, pk):
         follow_to = self.get_object()
         context = {'follow_to': follow_to,
                    'request': request}
@@ -41,18 +41,18 @@ class UserViewSet(viewsets.ModelViewSet):
 
         if request.method == 'POST':
             Following.objects.create(follower=request.user,
-                                  to_follow=follow_to)
+                                     to_follow=follow_to)
             return Response(data=create_serializer.data,
                             status=status.HTTP_201_CREATED)
         if request.method == 'DELETE':
             Following.objects.get(follower=request.user,
-                               to_follow_id=pk).delete()
+                                  to_follow_id=pk).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['GET'],
             permission_classes=(IsAuthenticated,),
             detail=False, )
-    def follows(self, request):
+    def subscriptions(self, request):
         queryset = User.objects.filter(
             subscribing__follower=self.request.user)
         paginator = CustomPagination()
@@ -137,7 +137,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         if not request.user.cart.exists():
             return Response(
-                'Корзина пуста', status=status.HTTP_400_BAD_REQUEST)
+                'Корзина пуста',
+                status=status.HTTP_400_BAD_REQUEST)
         ingredients = (
             IngredientRecipe.objects
             .filter(recipe__cart__user=request.user)
