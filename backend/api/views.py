@@ -30,23 +30,23 @@ class UserViewSet(viewsets.ModelViewSet):
             permission_classes=(IsAuthenticated,),
             detail=True)
     def subscribe(self, request, pk):
-        following = self.get_object()
-        context = {'followng': following,
+        follow = self.get_object()
+        context = {'follow': follow,
                    'request': request}
         serializer_to_validate = ValidateFollowSerializer(
             data=request.data, context=context)
         serializer_to_validate.is_valid(raise_exception=True)
         serializer_to_create = FollowSerializer(
-            following, context={'request': request})
+            follow, context={'request': request})
 
         if request.method == 'POST':
             Follow.objects.create(follower=request.user,
-                                  following=following)
+                                  to_follow=follow)
             return Response(data=serializer_to_create.data,
                             status=status.HTTP_201_CREATED)
-        elif request.method == 'DELETE':
+        if request.method == 'DELETE':
             Follow.objects.get(follower=request.user,
-                               following_id=pk).delete()
+                               to_follow_id=pk).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['GET'],

@@ -21,7 +21,7 @@ class UserAdmin(admin.ModelAdmin):
 class FollowAdmin(admin.ModelAdmin):
     list_display = (
         'follower',
-        'following',
+        'to_follow',
     )
-    search_fields = ('user', 'author',)
+    search_fields = ('follower__username', 'to_follow__username')
     empty_value_display = '-пусто-'

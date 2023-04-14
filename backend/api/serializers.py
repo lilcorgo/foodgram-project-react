@@ -32,7 +32,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = self.context('request').user
         if user.is_authenticated:
             return Follow.objects.filter(
-                follower=user, following=obj).exists()
+                follower=user, to_follow=obj).exists()
         return False
 
 
@@ -261,19 +261,19 @@ class FollowSerializer(UserSerializer):
 class ValidateFollowSerializer(serializers.Serializer):
     def validate(self, data):
         follower = self.context['request'].user
-        following = self.context['following']
+        follow = self.context['follow']
         method = self.context['request'].method
 
-        if follower == following:
+        if follower == follow:
             raise serializers.ValidationError(
                 'Подписка на себя невозможна')
         if method == 'POST':
             if Follow.objects.filter(follower=follower,
-                                     following=following).exists():
+                                     to_follow=follow).exists():
                 raise serializers.ValidationError('Вы уже подписаны на автора')
         elif method == 'DELETE':
             if not Follow.objects.filter(follower=follower,
-                                         following=following).exists():
+                                         to_follow=follow).exists():
                 raise serializers.ValidationError('Вы не подписаны на автора')
 
         return data
@@ -281,6 +281,7 @@ class ValidateFollowSerializer(serializers.Serializer):
 
 class ShoppingCartSerializer(serializers.Serializer):
     def validate(self, data):
+
         action = self.context['action']
         user = self.context['user']
         recipe = self.context['recipe']
@@ -295,7 +296,8 @@ class ShoppingCartSerializer(serializers.Serializer):
                 raise serializers.ValidationError('Уже добавлен в избранное')
             elif method == 'DELETE' and not favorited:
                 raise serializers.ValidationError('Не в избранном')
-        elif action == 'shopping_cart':
+            
+        if action == 'shopping_cart':
             if method == 'POST' and in_cart:
                 raise serializers.ValidationError('Уже в корзине')
             elif method == 'DELETE' and not in_cart:
