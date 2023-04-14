@@ -39,7 +39,7 @@ class User(AbstractUser):
         return self.username
 
 
-class Follow(models.Model):
+class Following(models.Model):
     '''Стандартная модель подписки.'''
 
     follower = models.ForeignKey(

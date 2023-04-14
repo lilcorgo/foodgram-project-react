@@ -4,7 +4,7 @@ from drf_extra_fields.fields import Base64ImageField
 from recipes.models import (FavoriteRecipe, Ingredient, IngredientRecipe,
                             Recipe, ShoppingCart, Tag)
 from rest_framework import serializers
-from users.models import Follow, User
+from users.models import Following, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -29,7 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         user = self.context('request').user
         if user.is_authenticated:
-            return Follow.objects.filter(
+            return Following.objects.filter(
                 follower=user, to_follow=obj).exists()
         return False
 
@@ -263,19 +263,19 @@ class FollowSerializer(UserSerializer):
 class ValidateFollowSerializer(serializers.Serializer):
     def validate(self, data):
         follower = self.context['request'].user
-        follow = self.context['follow']
+        follow_to = self.context['follow_to']
         method = self.context['request'].method
 
-        if follower == follow:
+        if follower == follow_to:
             raise serializers.ValidationError(
                 'Подписка на себя невозможна')
         if method == 'POST':
-            if Follow.objects.filter(follower=follower,
-                                     to_follow=follow).exists():
+            if Following.objects.filter(follower=follower,
+                                     to_follow=follow_to).exists():
                 raise serializers.ValidationError('Вы уже подписаны на автора')
         elif method == 'DELETE':
-            if not Follow.objects.filter(follower=follower,
-                                         to_follow=follow).exists():
+            if not Following.objects.filter(follower=follower,
+                                     to_follow=follow_to).exists():
                 raise serializers.ValidationError('Вы не подписаны на автора')
 
         return data

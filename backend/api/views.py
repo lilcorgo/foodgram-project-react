@@ -10,7 +10,7 @@ from rest_framework.response import Response
 
 from recipes.models import (FavoriteRecipe, Ingredient, IngredientRecipe,
                             Recipe, ShoppingCart, Tag)
-from users.models import Follow, User
+from users.models import Following, User
 from .filters import RecipeFilter
 from .mixins import RetrieveListViewSet
 from .paginators import CustomPagination
@@ -29,35 +29,35 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(methods=['POST', 'DELETE'],
             permission_classes=(IsAuthenticated,),
             detail=True)
-    def subscribe(self, request, pk):
-        follow = self.get_object()
-        context = {'follow': follow,
+    def follow(self, request, pk):
+        follow_to = self.get_object()
+        context = {'follow_to': follow_to,
                    'request': request}
         validate_serializer = ValidateFollowSerializer(
             data=request.data, context=context)
         validate_serializer.is_valid(raise_exception=True)
         create_serializer = FollowSerializer(
-            follow, context={'request': request})
+            follow_to, context={'request': request})
 
         if request.method == 'POST':
-            Follow.objects.create(follower=request.user,
-                                  to_follow=follow)
+            Following.objects.create(follower=request.user,
+                                  to_follow=follow_to)
             return Response(data=create_serializer.data,
                             status=status.HTTP_201_CREATED)
         if request.method == 'DELETE':
-            Follow.objects.get(follower=request.user,
+            Following.objects.get(follower=request.user,
                                to_follow_id=pk).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['GET'],
             permission_classes=(IsAuthenticated,),
             detail=False, )
-    def subscriptions(self, request):
+    def follows(self, request):
         queryset = User.objects.filter(
             subscribing__follower=self.request.user)
         paginator = CustomPagination()
-        subscriptions = paginator.paginate_queryset(queryset, request)
-        serializer = FollowSerializer(subscriptions, many=True,
+        follows = paginator.paginate_queryset(queryset, request)
+        serializer = FollowSerializer(follows, many=True,
                                       context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Follow, User
+from .models import Following, User
 
 
 @admin.register(User)
@@ -17,8 +17,8 @@ class UserAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-@admin.register(Follow)
-class FollowAdmin(admin.ModelAdmin):
+@admin.register(Following)
+class FollowingAdmin(admin.ModelAdmin):
     list_display = (
         'follower',
         'to_follow',
