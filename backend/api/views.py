@@ -136,6 +136,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             data=to_create.data, status=status.HTTP_201_CREATED)
 
     @action(methods=['GET'],
+            detail=False,
             permission_classes=(IsAuthenticated,))
     def download_shopping_cart(self, request):
         if not request.user.cart_items.exists():
