@@ -135,11 +135,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
             detail=False,
             permission_classes=(IsAuthenticated,))
     def download_shopping_cart(self, request):
-        if not request.user.cart.exists():
+        if not request.user.cart_items.exists():
             return Response(
                 'Корзина пуста',
                 status=status.HTTP_400_BAD_REQUEST)
-        recipes = Recipe.objects.filter(recipe__cart__user=request.user)
+        recipes = Recipe.objects.filter(added_to_cart__user=request.user)
         ingredients = (
             IngredientRecipe.objects
             .filter(recipies__in=recipes)
