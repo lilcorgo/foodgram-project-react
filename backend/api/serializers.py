@@ -261,19 +261,19 @@ class FollowSerializer(UserSerializer):
 class ValidateFollowSerializer(serializers.Serializer):
     def validate(self, data):
         follower = self.context['request'].user
-        subscribe_to = self.context['subscribe_to']
+        following = self.context['following']
         method = self.context['request'].method
 
-        if follower == subscribe_to:
+        if follower == following:
             raise serializers.ValidationError(
                 'Подписка на себя невозможна')
         if method == 'POST':
             if Follow.objects.filter(follower=follower,
-                                     following=subscribe_to).exists():
+                                     following=following).exists():
                 raise serializers.ValidationError('Вы уже подписаны на автора')
         elif method == 'DELETE':
             if not Follow.objects.filter(follower=follower,
-                                         following=subscribe_to).exists():
+                                         following=following).exists():
                 raise serializers.ValidationError('Вы не подписаны на автора')
 
         return data
