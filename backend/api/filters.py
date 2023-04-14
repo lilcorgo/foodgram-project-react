@@ -1,5 +1,5 @@
-from django_filters import (AllValuesMultipleFilter, FilterSet,
-                            NumberFilter)
+from django_filters import AllValuesMultipleFilter, FilterSet, NumberFilter
+
 from recipes.models import Recipe
 
 

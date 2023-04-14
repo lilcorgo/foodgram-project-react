@@ -1,10 +1,12 @@
 from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+
 from recipes.models import (FavoriteRecipe, Ingredient, IngredientRecipe,
                             Recipe, ShoppingCart, Tag)
-from rest_framework import serializers
 from users.models import Following, User
+
 from .paginators import RecipesLimitPagination
 
 

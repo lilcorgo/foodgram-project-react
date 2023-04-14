@@ -1,6 +1,6 @@
 from django.db.models import Sum
-from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
@@ -11,13 +11,14 @@ from rest_framework.response import Response
 from recipes.models import (FavoriteRecipe, Ingredient, IngredientRecipe,
                             Recipe, ShoppingCart, Tag)
 from users.models import Following, User
+
 from .filters import RecipeFilter
 from .mixins import RetrieveListViewSet
 from .paginators import CustomPagination
 from .permissions import IsAdminOrAuthorOrReadOnly
-from .serializers import (CreateUpdateRecipeSerializer, ShoppingCartSerializer,
+from .serializers import (CreateUpdateRecipeSerializer, FollowSerializer,
                           IngredientSerializer, RecipeSerializer,
-                          ShortRecipeSerializer, FollowSerializer,
+                          ShoppingCartSerializer, ShortRecipeSerializer,
                           TagSerializer, UserSerializer,
                           ValidateFollowSerializer)
 
@@ -39,15 +40,15 @@ class UserViewSet(viewsets.ModelViewSet):
         create_serializer = FollowSerializer(
             follow_to, context={'request': request})
 
-        if request.method == 'POST':
-            Following.objects.create(follower=request.user,
-                                     to_follow=follow_to)
-            return Response(data=create_serializer.data,
-                            status=status.HTTP_201_CREATED)
         if request.method == 'DELETE':
             Following.objects.get(follower=request.user,
                                   to_follow_id=pk).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+        Following.objects.create(follower=request.user,
+                                 to_follow=follow_to)
+        return Response(data=create_serializer.data,
+                        status=status.HTTP_201_CREATED)
 
     @action(methods=['GET'],
             permission_classes=(IsAuthenticated,),
@@ -105,15 +106,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         to_validate.is_valid(raise_exception=True)
         serializer = ShortRecipeSerializer(recipe)
 
-        if request.method == 'POST':
-            FavoriteRecipe.objects.get_or_create(
-                recipe=recipe, user=request.user)
-            return Response(
-                data=serializer.data, status=status.HTTP_201_CREATED)
         if request.method == 'DELETE':
             FavoriteRecipe.objects.get(recipe=recipe,
                                        user=request.user).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+        FavoriteRecipe.objects.get_or_create(
+            recipe=recipe, user=request.user)
+        return Response(
+            data=serializer.data, status=status.HTTP_201_CREATED)
 
     @action(methods=['POST', 'DELETE'],
             detail=True,
@@ -127,13 +128,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         to_validate.is_valid(raise_exception=True)
         to_create = ShortRecipeSerializer(recipe)
 
-        if request.method == 'POST':
-            ShoppingCart.objects.create(recipe=recipe, user=request.user)
-            return Response(
-                data=to_create.data, status=status.HTTP_201_CREATED)
         if request.method == 'DELETE':
             ShoppingCart.objects.get(recipe=recipe, user=request.user).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+        ShoppingCart.objects.create(recipe=recipe, user=request.user)
+        return Response(
+            data=to_create.data, status=status.HTTP_201_CREATED)
 
     @action(methods=['GET'],
             permission_classes=(IsAuthenticated,))
