@@ -139,21 +139,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(
                 'Корзина пуста',
                 status=status.HTTP_400_BAD_REQUEST)
+        recipes = Recipe.objects.filter(recipe__cart__user=request.user)
         ingredients = (
             IngredientRecipe.objects
-            .filter(recipe__cart__user=request.user)
-            .values('ingredient')
+            .filter(recipies__in=recipes)
+            .values('ingredient__name', 'ingredients__measurement_unit')
             .annotate(total_amount=Sum('amount'))
-            .values_list(
-                'ingredient__name',
-                'total_amount',
-                'ingredient__measurement_unit'
-            )
         )
 
         text = ''
         for ingredient in ingredients:
-            text += '{} - {} {}. \n'.format(*ingredient)
+            text += (f'{ingredient["ingredient__name"]} - {ingredient["amount"]}'
+                     f' {ingredient["ingredient__measurement_unit"]}. \n')
 
         file = HttpResponse(
             f'Корзина:\n {text}', content_type='text/plain'
