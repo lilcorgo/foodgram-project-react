@@ -149,7 +149,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         text = ''
         for ingredient in ingredients:
-            text += (f'{ingredient["ingredient__name"]} - {ingredient["amount"]}'
+            text += (f'{ingredient["ingredient__name"]} - {ingredient["total_amount"]}'
                      f' {ingredient["ingredient__measurement_unit"]}. \n')
 
         file = HttpResponse(
