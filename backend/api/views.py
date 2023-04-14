@@ -33,16 +33,16 @@ class UserViewSet(viewsets.ModelViewSet):
         follow = self.get_object()
         context = {'follow': follow,
                    'request': request}
-        serializer_to_validate = ValidateFollowSerializer(
+        validate_serializer = ValidateFollowSerializer(
             data=request.data, context=context)
-        serializer_to_validate.is_valid(raise_exception=True)
-        serializer_to_create = FollowSerializer(
+        validate_serializer.is_valid(raise_exception=True)
+        create_serializer = FollowSerializer(
             follow, context={'request': request})
 
         if request.method == 'POST':
             Follow.objects.create(follower=request.user,
                                   to_follow=follow)
-            return Response(data=serializer_to_create.data,
+            return Response(data=create_serializer.data,
                             status=status.HTTP_201_CREATED)
         if request.method == 'DELETE':
             Follow.objects.get(follower=request.user,
