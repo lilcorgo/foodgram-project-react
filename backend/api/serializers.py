@@ -6,8 +6,6 @@ from recipes.models import (FavoriteRecipe, Ingredient, IngredientRecipe,
 from rest_framework import serializers
 from users.models import Follow, User
 
-from .paginators import FollowRecipePagination
-
 
 class UserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
@@ -249,12 +247,16 @@ class FollowSerializer(UserSerializer):
         return Recipe.objects.filter(author_id=obj.id).count()
 
     def get_recipes(self, obj):
-        paginator = FollowRecipePagination()
-        limit = self.context['request'].query_params.get('recipes_limit', 3)
-        paginator.page_size = limit
-        queryset = obj.recipes.all()
-        page = paginator.paginate_queryset(queryset, self.context['request'])
-        serializer = ShortRecipeSerializer(page, many=True)
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit')
+        recipes = obj.recipes.all()
+        if limit:
+            recipes = recipes[:int(limit)]
+        serializer = ShortRecipeSerializer(
+            recipes,
+            many=True,
+            read_only=True,
+        )
         return serializer.data
 
 
@@ -296,7 +298,7 @@ class ShoppingCartSerializer(serializers.Serializer):
                 raise serializers.ValidationError('Уже добавлен в избранное')
             elif method == 'DELETE' and not favorited:
                 raise serializers.ValidationError('Не в избранном')
-            
+
         if action == 'shopping_cart':
             if method == 'POST' and in_cart:
                 raise serializers.ValidationError('Уже в корзине')
