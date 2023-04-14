@@ -158,7 +158,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                      f'{ingredient["ingredient__measurement_unit"]}.\n')
 
         file = HttpResponse(
-            f'Корзина:\n {text}', content_type='text/plain'
+            f'Корзина:\n{text}', content_type='text/plain'
         )
 
         file['Content-Disposition'] = ('attachment; filename=cart.txt')
