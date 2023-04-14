@@ -11,11 +11,11 @@ router.register('recipes', RecipeViewSet, basename='recipes')
 
 
 urlpatterns = [
-    path('', include(router.urls)),
-    path('', include('djoser.urls')),
     path('users/subscriptions/', UserViewSet.as_view({'get': 'subscriptions'}),
          name='user-subscriptions'),
     path('users/<int:pk>/subscribe/', UserViewSet.as_view(
         {'post': 'subscribe', 'delete': 'subscribe'}), name='user-subscribe'),
+    path('', include(router.urls)),
+    path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
 ]
