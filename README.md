@@ -25,12 +25,11 @@ git clone git@github.com:lilcorgo/foodgram-project-react.git
 Cоздать и активировать виртуальное окружение:
 
 ```
-python3 -m venv env
+python3 -m venv venv
+. venv/bin/activate
 ```
 
-```
-. env/bin/activate
-```
+Обновить pip:
 
 ```
 python3 -m pip install --upgrade pip
