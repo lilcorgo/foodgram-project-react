@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='Follow',
+            name='Following',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('follower', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='follower', to=settings.AUTH_USER_MODEL, verbose_name='Подписчик')),
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.AddConstraint(
-            model_name='follow',
+            model_name='following',
             constraint=models.UniqueConstraint(fields=('follower', 'to_follow'), name='unique_follow'),
         ),
     ]
