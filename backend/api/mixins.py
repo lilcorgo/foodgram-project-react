@@ -1,9 +1,7 @@
-from rest_framework import mixins, viewsets
+from rest_framework.mixins import RetrieveModelMixin, ListModelMixin
+from rest_framework.viewsets import GenericViewSet
 
 
-class RetrieveListViewSet(
-    mixins.RetrieveModelMixin,
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet):
+class RetrieveListViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
 
     pass
