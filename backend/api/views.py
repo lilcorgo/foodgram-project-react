@@ -65,6 +65,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class TagViewSet(RetrieveListViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
 
 
 class IngredientViewSet(RetrieveListViewSet):
@@ -72,6 +73,7 @@ class IngredientViewSet(RetrieveListViewSet):
     serializer_class = IngredientSerializer
     filter_backends = (SearchFilter,)
     search_fields = ('^name',)
+    pagination_class = None
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

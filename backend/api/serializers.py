@@ -5,7 +5,7 @@ from recipes.models import (FavoriteRecipe, Ingredient, IngredientRecipe,
                             Recipe, ShoppingCart, Tag)
 from rest_framework import serializers
 from users.models import Following, User
-
+from .paginators import RecipesLimitPagination
 
 class UserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
@@ -27,10 +27,10 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        current_user = self.context['request'].user
-        if current_user.is_authenticated:
+        user = self.context['request'].user
+        if user.is_authenticated:
             return Following.objects.filter(
-                follower=current_user, to_follow=obj).exists()
+                follower=user, to_follow=obj).exists()
         return False
 
 
@@ -247,16 +247,12 @@ class FollowSerializer(UserSerializer):
         return Recipe.objects.filter(author_id=obj.id).count()
 
     def get_recipes(self, obj):
-        request = self.context.get('request')
-        limit = request.GET.get('recipes_limit')
-        recipes = obj.recipes.all()
-        if limit:
-            recipes = recipes[:int(limit)]
-        serializer = ShortRecipeSerializer(
-            recipes,
-            many=True,
-            read_only=True,
-        )
+        paginator = RecipesLimitPagination()
+        limit = self.context['request'].query_params.get('recipes_limit', 3)
+        paginator.page_size = limit
+        queryset = obj.recipes.all()
+        page = paginator.paginate_queryset(queryset, self.context['request'])
+        serializer = ShortRecipeSerializer(page, many=True)
         return serializer.data
 
 
