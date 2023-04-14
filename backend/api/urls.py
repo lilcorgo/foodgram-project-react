@@ -14,10 +14,11 @@ router.register('recipes', RecipeViewSet, basename='recipes')
 urlpatterns = [
     path('users/', views.UserViewSet.as_view(
         {'get': 'list', 'post': 'create'}), name='user-list-create'),
-    path('users/me/', views.UserViewSet.as_view(
-        {'get': 'me'}), name='user-me'),
+
     path('users/<int:id>/', views.UserViewSet.as_view(
         {'get': 'retrieve'}), name='user-detail'),
+    path('users/me/', views.UserViewSet.as_view(
+        {'get': 'me'}), name='user-me'),
     path('users/set_password/', views.UserViewSet.as_view(
         {'post': 'set_password'}), name='user-set-password'),
     path('users/subscriptions/', UserViewSet.as_view({'get': 'subscriptions'}),
