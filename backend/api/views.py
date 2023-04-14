@@ -94,8 +94,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
             permission_classes=(IsAuthenticated,))
     def favorite(self, request, pk):
         recipe = self.get_object()
-        context = {'action': 'favorite', 'user': request.user,
-                   'recipe': recipe, 'method': request.method}
+        context = {
+            'action': 'favorite',
+            'user': request.user,
+            'recipe': recipe,
+            'method': request.method
+        }
         to_validate = ShoppingCartSerializer(data=request.data,
                                              context=context)
         to_validate.is_valid(raise_exception=True)
@@ -106,7 +110,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 recipe=recipe, user=request.user)
             return Response(
                 data=serializer.data, status=status.HTTP_201_CREATED)
-        elif request.method == 'DELETE':
+        if request.method == 'DELETE':
             FavoriteRecipe.objects.get(recipe=recipe,
                                        user=request.user).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -127,12 +131,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
             ShoppingCart.objects.create(recipe=recipe, user=request.user)
             return Response(
                 data=to_create.data, status=status.HTTP_201_CREATED)
-        elif request.method == 'DELETE':
+        if request.method == 'DELETE':
             ShoppingCart.objects.get(recipe=recipe, user=request.user).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['GET'],
-            detail=False,
             permission_classes=(IsAuthenticated,))
     def download_shopping_cart(self, request):
         if not request.user.cart_items.exists():
@@ -149,8 +152,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         text = ''
         for ingredient in ingredients:
-            text += (f'{ingredient["ingredient__name"]} - {ingredient["total_amount"]}'
-                     f' {ingredient["ingredient__measurement_unit"]}. \n')
+            text += (f'{ingredient["ingredient__name"]} - '
+                     f'{ingredient["total_amount"]} '
+                     f'{ingredient["ingredient__measurement_unit"]}.\n')
 
         file = HttpResponse(
             f'Корзина:\n {text}', content_type='text/plain'

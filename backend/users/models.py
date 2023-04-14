@@ -67,4 +67,5 @@ class Following(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.follower.username} подписался на {self.to_follow.username}.'
+        return (f'{self.follower.username} подписался на '
+                f'{self.to_follow.username}.')

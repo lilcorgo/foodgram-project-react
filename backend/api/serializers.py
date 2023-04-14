@@ -7,6 +7,7 @@ from rest_framework import serializers
 from users.models import Following, User
 from .paginators import RecipesLimitPagination
 
+
 class UserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
     password = serializers.CharField(
@@ -177,36 +178,36 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         return serializer.data
 
     @transaction.atomic
-    def create(self, validated_data):
-        recipe = self.create_recipeingredient(validated_data)
+    def create(self, data):
+        recipe = self.create_recipeingredient(data)
 
         return recipe
 
     @transaction.atomic
-    def update(self, instance, validated_data):
-        self.create_recipeingredient(validated_data, instance, update=True)
-        instance.name = validated_data.get('name', instance.name)
-        instance.image = validated_data.get('image', instance.image)
-        instance.text = validated_data.get('text', instance.text)
-        instance.cooking_time = validated_data.get('cooking_time',
-                                                   instance.cooking_time)
+    def update(self, instance, data):
+        self.create_recipeingredient(data, instance, update=True)
+        instance.name = data.get('name', instance.name)
+        instance.image = data.get('image', instance.image)
+        instance.text = data.get('text', instance.text)
+        instance.cooking_time = data.get('cooking_time',
+                                         instance.cooking_time)
         instance.save()
 
         return instance
 
-    def create_recipeingredient(self, validated_data: dict,
-                                recipe: Recipe = None,
-                                update: bool = False):
-        ingredients_data = validated_data.pop('ingredientrecipe_set')
-        tags_data = validated_data.pop('tags')
+    def create_recipeingredient(self, data: dict,
+                                recipe=None,
+                                update=False):
+        ingredients_data = data.pop('ingredientrecipe_set')
+        tags_data = data.pop('tags')
         if update:
             IngredientRecipe.objects.filter(recipe=recipe).delete()
         else:
-            recipe = Recipe.objects.create(**validated_data)
+            recipe = Recipe.objects.create(**data)
         ingredients_to_create = []
-        for ingredient_data in ingredients_data:
-            ingredient_id = ingredient_data['ingredient']['id']
-            ingredient_amount = ingredient_data['amount']
+        for ingredient in ingredients_data:
+            ingredient_id = ingredient['ingredient']['id']
+            ingredient_amount = ingredient['amount']
             try:
                 ingredient = Ingredient.objects.get(id=ingredient_id)
             except Ingredient.DoesNotExist:
@@ -264,22 +265,23 @@ class ValidateFollowSerializer(serializers.Serializer):
 
         if follower == follow_to:
             raise serializers.ValidationError(
-                'Подписка на себя невозможна')
+                'Невозможно подписатся на себя')
         if method == 'POST':
             if Following.objects.filter(follower=follower,
-                                     to_follow=follow_to).exists():
-                raise serializers.ValidationError('Вы уже подписаны на автора')
-        elif method == 'DELETE':
+                                        to_follow=follow_to).exists():
+                raise serializers.ValidationError(
+                    'Вы уже подписаны на автора')
+        if method == 'DELETE':
             if not Following.objects.filter(follower=follower,
-                                     to_follow=follow_to).exists():
-                raise serializers.ValidationError('Вы не подписаны на автора')
+                                            to_follow=follow_to).exists():
+                raise serializers.ValidationError(
+                    'Вы не подписаны на автора')
 
         return data
 
 
 class ShoppingCartSerializer(serializers.Serializer):
     def validate(self, data):
-
         action = self.context['action']
         user = self.context['user']
         recipe = self.context['recipe']
@@ -291,14 +293,13 @@ class ShoppingCartSerializer(serializers.Serializer):
 
         if action == 'favorite':
             if method == 'POST' and favorited:
-                raise serializers.ValidationError('Уже добавлен в избранное')
-            elif method == 'DELETE' and not favorited:
-                raise serializers.ValidationError('Не в избранном')
+                raise serializers.ValidationError('Уже в избранном')
+            if method == 'DELETE' and not favorited:
+                raise serializers.ValidationError('Отсутствует в избранном')
 
         if action == 'shopping_cart':
             if method == 'POST' and in_cart:
                 raise serializers.ValidationError('Уже в корзине')
-            elif method == 'DELETE' and not in_cart:
-                raise serializers.ValidationError('Не в корзине')
-
+            if method == 'DELETE' and not in_cart:
+                raise serializers.ValidationError('Отсутствует в корзине')
         return data
