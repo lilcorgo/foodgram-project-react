@@ -166,7 +166,7 @@ class FavoriteRecipe(models.Model):
         )
 
     def __str__(self):
-        return f'{self.recipe.name} авторства {self.user.name}.'
+        return f'{self.recipe.name} авторства {self.user}.'
 
 
 class ShoppingCart(models.Model):
